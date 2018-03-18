@@ -29,7 +29,18 @@ function saveUser(req, res){
         user.email = params.email;
         user.role = 'ROLE_USER';
         user.image = null;
+        
+        //Controlar usuario duplicados
+        User.find({ $or: [
+            {email: user.email.toLowerCase()},
+            {nick: user.nick.toLowerCase()}
+        ]}).exec((err, users) =>{
+            if(err) return res.status(500).send({messange: 'Error en la peticion de usuario'});
 
+            if(users && users.length >= 1){
+                return res.status(200).send({messange: 'El usuario que intentas registrar ya existe'});
+            }else{
+                 //Cifra la password y guarda los datos
         bcrypt.hash(params.password, null, null, (err, hash) =>{
             user.password = hash;
 
@@ -43,6 +54,9 @@ function saveUser(req, res){
                 }
             });
         });
+            }
+        });
+       
     }else{
         res.status(400).send({message:'Envia todos los campos necesarios'});
     }
