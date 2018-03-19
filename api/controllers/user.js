@@ -6,7 +6,7 @@ var User = require('../models/user');
 
 var jwt = require('../services/jwt');
 
-
+//Metodos de prueba
 function home(req, res){
     res.status(200).send({
         message: 'Hola Mundo desde el servidor de NodeJs'
@@ -20,6 +20,7 @@ function pruebas(req, res){
     });
 }
 
+//Registro de usuario
 function saveUser(req, res){
     var params = req.body;
     var user = new User();
@@ -64,6 +65,7 @@ function saveUser(req, res){
     }
 }
 
+//Login de usuario
 function loginUser(req, res){
     var params = req.body;
 
@@ -98,9 +100,23 @@ function loginUser(req, res){
     });
 }
 
+//Conseguir los datos de un usuario
+function getUser(req, res){
+    var userId = req.params.id;
+
+    User.findById(userId, (err, user) =>{
+        if(err) return res.status(500).send({message: 'Error en la peticion'});
+
+        if(!user) return res.status(404).send({message: 'El usuario no existe'});
+
+        return res.status(200).send({user});
+    });
+}
+
 module.exports = {
     home,
     pruebas,
     saveUser,
-    loginUser
+    loginUser,
+    getUser
 }
