@@ -220,6 +220,41 @@ async function followUserId(user_id){
 
 }
 
+//Contador de usuarios que seguimos y que nos siguen
+function getCounters(req, res){
+    var userId = req.user.sub;
+    if(req.params.id){
+        userId = req.params.id;
+    }
+
+    getCountFollow(userId).then((value)=> {
+        return res.status(200).send(value);
+    });
+}
+
+async function getCountFollow(user_id){
+    try {
+        var following = await Follow.count({"user": user_id}).then((count)=> {
+            return count;
+        }).catch((error)=>{
+            return handleError(error);
+        });
+
+        var followed = await Follow.count({"followed": user_id}).then((count)=> {
+            return count;
+        }).catch((error)=>{
+            return handleError(error);
+        });
+
+        return {
+            following: following,
+            followed: followed
+        }
+    } catch (error) {
+        return handleError(error);
+    }
+}
+
 //Edicion de un usuario
 function updateUser(req, res) {
     var userId = req.params.id;
@@ -312,7 +347,9 @@ module.exports = {
     loginUser,
     getUser,
     getUsers,
+    getCounters,
     updateUser,
     uploadImage,
     getImageFile
+    
 }
