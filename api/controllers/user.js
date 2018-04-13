@@ -169,12 +169,55 @@ function getUsers(req, res) {
 
         if (!users) return res.status(404).send({ message: 'No hay usuarios disponibles' });
 
-        return res.status(200).send({
-            users,
-            total,
-            pages: Math.ceil(total / itemsPerPage)
+        followUserId(identity_user_id).then((value)=>{
+            return res.status(200).send({
+                users,
+                users_following: value.following,
+                users_followed: value.followed,
+                total,
+                pages: Math.ceil(total / itemsPerPage)
+            });
         });
+
+        
     });
+}
+
+async function followUserId(user_id){
+    try{
+        var following = await Follow.find({"user": user_id}).select({'_id':0, '__v':0, 'user':0}).then((follows)=> {
+            var follows_clean = [];
+    
+            follows.forEach((follow) =>{
+                follows_clean.push(follow.followed);
+            });
+    
+            return follows_clean;
+        }).catch((err)=>{
+            return handleError(err);
+        });
+    
+        var followed = await Follow.find({"followed": user_id}).select({'_id':0, '__v':0, 'followed':0}).then((follows)=> {
+            var follows_clean = [];
+    
+            follows.forEach((follow) =>{
+                follows_clean.push(follow.user);
+            });
+    
+            return follows_clean;
+        }).catch((err)=>{
+            return handleError(err);
+        });
+    
+        return {
+            following: following,
+            followed: followed
+        }
+    } catch(err){
+        return handleError(err);
+    }
+    
+
 }
 
 //Edicion de un usuario
